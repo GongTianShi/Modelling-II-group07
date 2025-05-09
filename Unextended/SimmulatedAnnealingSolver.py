@@ -1,6 +1,7 @@
 import LoadNetworkData as lnd
 import random as rand
 import math
+from tqdm import tqdm
 
 # Load network data
 small_network_data = lnd.load_data_prefixed(prefix="SMALL", verbose=False)
@@ -30,11 +31,12 @@ def total_cost(n, c, w, f, hub_selections, hub_assignments):
 
 # Makes new hub selection based on the previous
 def make_new_hub_selection(n, hub_selections):
-    new_hub_selections = hub_selections
+    new_hub_selections = set([h for h in hub_selections])
 
-    add = rand.choice([i for i in range(n) if i not in new_hub_selections])
+    if len(new_hub_selections) != n:
+        add = rand.choice([i for i in range(n) if i not in new_hub_selections])
+        new_hub_selections.add(add)
     remove = rand.choice(list(new_hub_selections))
-    new_hub_selections.add(add)
     new_hub_selections.remove(remove)
 
     if len(new_hub_selections) != 0:
@@ -47,7 +49,7 @@ def assign_nodes_to_hubs(n, c, hub_selections):
     return [min(hub_selections, key=lambda h: c[i][h]) for i in range(n)]
 
 # Solves the PostNL problem using simulated annealing meta heuristic
-def simulated_annealing_solver(network_data, T0=1e6, Tmin=1, boltzmann_const=0.1, alpha_decay=0.95, max_iter=1000000):
+def simulated_annealing_solver(network_data, log=True, T0=10e6, Tmin=1, boltzmann_const=1e-20, alpha_decay=0.96, max_iter=10000000):
     # Destructure network data
     n, c, w, f, q, d = network_data
 
@@ -73,7 +75,7 @@ def simulated_annealing_solver(network_data, T0=1e6, Tmin=1, boltzmann_const=0.1
             new_total_cost = total_cost(n, c, w, f, new_hub_selections, new_hub_assignments)
 
             total_cost_diff = new_total_cost - current_total_cost
-            if total_cost_diff < 0 or rand.random() < math.exp(-total_cost_diff / (boltzmann_const * T)):
+            if (total_cost_diff < 0) or (rand.random() < math.exp(-total_cost_diff / (boltzmann_const * T))):
                 current_hub_selections = new_hub_selections
                 current_hub_assignments = new_hub_assignments
                 current_total_cost = new_total_cost
@@ -84,21 +86,64 @@ def simulated_annealing_solver(network_data, T0=1e6, Tmin=1, boltzmann_const=0.1
 
             T *= alpha_decay  # cool down
 
-    print(f"Best hub selections: {best_hub_selections}")
-    print(f"Best hub assignments: {best_hub_assignments}")
-    print(f"Best total cost: {best_total_cost}")
-    print("")
-    print(f"Current hub selections: {current_hub_selections}")
-    print(f"Current hub assignments: {current_hub_assignments}")
-    print(f"Current total cost: {current_total_cost}")
+    if log:
+        print(f"Best hub selections: {best_hub_selections}")
+        print(f"Best hub assignments: {best_hub_assignments}")
+        print(f"Best total cost: {best_total_cost}")
+        print("")
+        print(f"Current hub selections: {current_hub_selections}")
+        print(f"Current hub assignments: {current_hub_assignments}")
+        print(f"Current total cost: {current_total_cost}")
 
+    return best_hub_selections, best_hub_assignments, best_total_cost
 
 print("########## simulated annealing solver solution small network #######################")
 simulated_annealing_solver(small_network_data)
-print("####################################################################")
+print("####################################################################################")
 print("")
 
 print("########## simulated annealing solver solution small network #######################")
 simulated_annealing_solver(large_network_data)
-print("####################################################################")
+print("####################################################################################")
 print("")
+
+# Determine optimal constants #########################################################
+best_cost_small = math.inf
+best_cost_large = math.inf
+
+boltzmann_order_small = None
+boltzmann_order_large = None
+
+alpha_decay_small = None
+alpha_decay_large = None
+
+best_selection_small = None
+best_selection_large = None
+
+best_assignment_small = None
+best_assignment_large = None
+
+for alpha_decay in tqdm([0.90, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98], desc="Outer tuning loop"):
+    for boltzmann_order in tqdm(range(-50, 50), desc="Inner tuning loop", leave=False):
+        selection_small, assignment_small, cost_small = simulated_annealing_solver(small_network_data, log=False, boltzmann_const=(10**boltzmann_order), alpha_decay=alpha_decay)
+        selection_large, assignment_large, cost_large = simulated_annealing_solver(large_network_data, log=False, boltzmann_const=(10**boltzmann_order), alpha_decay=alpha_decay)
+
+        if cost_small <= best_cost_small:
+            best_cost_small = cost_small
+            boltzmann_order_small = boltzmann_order
+            alpha_decay_small = alpha_decay
+            best_selection_small = selection_small
+            best_assignment_small = assignment_small
+
+        if cost_large <= best_cost_large:
+            best_cost_large = cost_large
+            boltzmann_order_large = boltzmann_order
+            alpha_decay_large = alpha_decay
+            best_selection_large = selection_large
+            best_assignment_large = assignment_large
+
+print("# TUNED PARAMS #######################")
+print(f"Small Network => boltzmann_order: {boltzmann_order_small}, alpha_decay: {alpha_decay_small}, best_cost_small: {best_cost_small}, selection: {best_selection_small}, assignment: {best_assignment_small}")
+print(f"Large Network => boltzmann_order: {boltzmann_order_large}, alpha_decay: {alpha_decay_large}, best_cost_large: {best_cost_large}, selection: {best_selection_large}, assignment: {best_assignment_large}")
+print("######################################")
+#######################################################################################
