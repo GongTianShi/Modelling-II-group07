@@ -2,6 +2,7 @@ import LoadNetworkData as lnd
 import random as rand
 import math
 from tqdm import tqdm
+import numpy as np
 
 # Load network data
 small_network_data = lnd.load_data_prefixed(prefix="SMALL", verbose=False)
@@ -108,8 +109,11 @@ print("#########################################################################
 print("")
 
 # Determine optimal constants #########################################################
-best_cost_small = math.inf
-best_cost_large = math.inf
+best_avg_cost_small = math.inf
+best_avg_cost_large = math.inf
+
+best_cost_small = None
+best_cost_large = None
 
 boltzmann_order_small = None
 boltzmann_order_large = None
@@ -125,25 +129,65 @@ best_assignment_large = None
 
 for alpha_decay in tqdm([0.90, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98], desc="Outer tuning loop"):
     for boltzmann_order in tqdm(range(-50, 50), desc="Inner tuning loop", leave=False):
-        selection_small, assignment_small, cost_small = simulated_annealing_solver(small_network_data, log=False, boltzmann_const=(10**boltzmann_order), alpha_decay=alpha_decay)
-        selection_large, assignment_large, cost_large = simulated_annealing_solver(large_network_data, log=False, boltzmann_const=(10**boltzmann_order), alpha_decay=alpha_decay)
+        boltzmann_order = float(boltzmann_order)
 
-        if cost_small <= best_cost_small:
-            best_cost_small = cost_small
+        selections_small = []
+        selections_large = []
+
+        assignments_small = []
+        assignments_large = []
+
+        costs_small = []
+        costs_large = []
+        for i in range(10):
+            selection_small, assignment_small, cost_small = simulated_annealing_solver(small_network_data, log=False, boltzmann_const=(10.0**boltzmann_order), alpha_decay=alpha_decay)
+            selection_large, assignment_large, cost_large = simulated_annealing_solver(large_network_data, log=False, boltzmann_const=(10.0**boltzmann_order), alpha_decay=alpha_decay)
+
+            selections_small.append(selection_small)
+            selections_large.append(selection_large)
+
+            assignments_small.append(assignment_small)
+            assignments_large.append(assignment_large)
+
+            costs_small.append(cost_small)
+            costs_large.append(cost_large)
+
+        avg_cost_small = sum(costs_small)/len(costs_small)
+        avg_cost_large = sum(costs_large)/len(costs_large)
+
+        i_min_small = np.argmin(costs_small)
+        i_min_large = np.argmin(costs_large)
+
+        cost_small = costs_small[i_min_small]
+        selection_small = selections_small[i_min_small]
+        assignment_small = assignments_small[i_min_small]
+
+        cost_large = costs_large[i_min_large]
+        selection_large = selections_large[i_min_large]
+        assignment_large = assignments_large[i_min_large]
+
+        if avg_cost_small <= best_avg_cost_small:
+            best_avg_cost_small = avg_cost_small
+
             boltzmann_order_small = boltzmann_order
             alpha_decay_small = alpha_decay
+            best_cost_small = cost_small
             best_selection_small = selection_small
             best_assignment_small = assignment_small
 
-        if cost_large <= best_cost_large:
-            best_cost_large = cost_large
+        if avg_cost_large <= best_avg_cost_large:
+            best_avg_cost_large = avg_cost_large
+
             boltzmann_order_large = boltzmann_order
             alpha_decay_large = alpha_decay
+            best_cost_large = cost_large
             best_selection_large = selection_large
             best_assignment_large = assignment_large
 
 print("# TUNED PARAMS #######################")
-print(f"Small Network => boltzmann_order: {boltzmann_order_small}, alpha_decay: {alpha_decay_small}, best_cost_small: {best_cost_small}, selection: {best_selection_small}, assignment: {best_assignment_small}")
-print(f"Large Network => boltzmann_order: {boltzmann_order_large}, alpha_decay: {alpha_decay_large}, best_cost_large: {best_cost_large}, selection: {best_selection_large}, assignment: {best_assignment_large}")
+print(f"Small Network => boltzmann_order: {boltzmann_order_small}, alpha_decay: {alpha_decay_small},\n \
+    best_avg_cost_small: {best_avg_cost_small}, best_cost_small: {best_cost_small}, selection: {best_selection_small}, assignment: {best_assignment_small}")
+print(f"Large Network => boltzmann_order: {boltzmann_order_large}, alpha_decay: {alpha_decay_large},\n \
+    best_avg_cost_large: {best_avg_cost_large}, best_cost_large: {best_cost_large}, selection: {best_selection_large}, assignment: {best_assignment_large}")
 print("######################################")
 #######################################################################################
