@@ -11,20 +11,23 @@ def node_assignment(hubs, cost_matrix):
 
 def get_cost(cost_matrix, flow_matrix, hub_cost, hubs, col_coef=3, trans_coef=1, dist_coef=2):
     no_nodes = len(hub_cost)
-    inflow = np.sum(flow_matrix, axis=0)
-    outflow = np.sum(flow_matrix, axis = 1)
+    toflow = np.sum(flow_matrix, axis=0)
+    fromflow = np.sum(flow_matrix, axis = 1)
 
     # get node assignment
     node_ass = node_assignment(hubs, cost_matrix)
 
     # Getting cost to and from
-    cost_toandfrom_hub = np.dot(cost_matrix[np.arange(no_nodes), node_ass],(inflow*dist_coef+outflow*col_coef))
+    collection_cost = np.sum(cost_matrix[np.arange(no_nodes), node_ass]*fromflow)*col_coef
+    distribution_cost =  np.sum(cost_matrix[np.arange(no_nodes), node_ass]*toflow)*dist_coef
+
+    cost_toandfrom_hub = collection_cost+distribution_cost
 
     # Getting the cost from hub to hub
     cost = 0
     for hub in hubs:
         flow_to_node = np.sum(flow_matrix[node_ass==hub, :], axis=0)
-        cost += np.dot(flow_to_node, cost_matrix[hub, :])
+        cost += np.dot(flow_to_node, cost_matrix[hub, node_ass])
 
     # Getting the hub costs
     hub_cost = np.sum(hub_cost[hubs])
@@ -68,9 +71,14 @@ flow_mat = np.array([[0, 1, 0],
                      [0, 0, 0]])
 hub_cost = np.array([1, 1, 1])
 print(get_cost(cost, flow_mat, hub_cost, hubs))'''
+print(cost)
+print(np.sum(flow_mat, axis=0))
+print(np.sum(flow_mat, axis=1))
 cost, hubs = greedy_algorithm(cost, flow_mat, hub_cost)
 print(cost)
-print(hubs)
+#print(np.sum(flow_mat, axis = 0))
+#print(dest_flow)
+
 
 
 
