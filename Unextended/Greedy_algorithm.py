@@ -37,19 +37,26 @@ def get_cost(cost_matrix, flow_matrix, hub_cost, hubs, col_coef=3, trans_coef=1,
 
 def greedy_algorithm(cost_matrix, flow_matrix, hub_cost):
     no_nodes = len(hub_cost)
-    hubs = np.array([2, 6, 8, 14])#np.random.randint(0, no_nodes, 2)
+    hubs = np.array([2, 3, 9])#np.random.randint(0, no_nodes, 2)#
     maximal_configuration = False
     cost = get_cost(cost_matrix, flow_matrix, hub_cost, hubs)
     totcost = cost
     while not maximal_configuration:
-        temp = totcost.copy()
+        temp = totcost
         for ii in range(no_nodes):
             if ii not in hubs:
                 new_hubs = np.concatenate((hubs, np.array([ii])))
                 new_cost = get_cost(cost_matrix, flow_matrix, hub_cost, new_hubs)
                 if new_cost < totcost:
-                    temp = new_cost
+                    totcost = new_cost
                     hubs = new_hubs
+        for hub in hubs:
+            if len(hubs) != 2:
+                new_hubs = hubs[hubs != hub]
+                new_cost = get_cost(cost_matrix, flow_matrix, hub_cost, new_hubs)
+                if new_cost < totcost:
+                        totcost = new_cost
+                        hubs = new_hubs
         if temp == totcost:
             maximal_configuration = True
     return totcost, hubs
@@ -60,7 +67,7 @@ def greedy_algorithm(cost_matrix, flow_matrix, hub_cost):
 
 
 
-number, cost, flow_mat, hub_cost, orig_flow, dest_flow = load_data_prefixed(prefix="LARGE", verbose=False)
+number, cost, flow_mat, hub_cost, orig_flow, dest_flow = load_data_prefixed(prefix="SMALL", verbose=False)
 # flow_mat Aij go from i-->j
 '''hubs = np.array([0, 1])
 cost = np.array([[0, 1, 1],
@@ -71,11 +78,13 @@ flow_mat = np.array([[0, 1, 0],
                      [0, 0, 0]])
 hub_cost = np.array([1, 1, 1])
 print(get_cost(cost, flow_mat, hub_cost, hubs))'''
-print(cost)
-print(np.sum(flow_mat, axis=0))
-print(np.sum(flow_mat, axis=1))
+
+print(f"costmat {cost}")
+print(f"flow_mat {flow_mat}")
+print(f"hub_cost{hub_cost}")
 cost, hubs = greedy_algorithm(cost, flow_mat, hub_cost)
 print(cost)
+print(hubs)
 #print(np.sum(flow_mat, axis = 0))
 #print(dest_flow)
 
