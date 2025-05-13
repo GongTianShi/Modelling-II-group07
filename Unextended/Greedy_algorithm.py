@@ -16,11 +16,9 @@ def get_cost(cost_matrix, flow_matrix, hub_cost, hubs, col_coef=3, trans_coef=1,
 
     # get node assignment
     node_ass = node_assignment(hubs, cost_matrix)
-    print(node_ass)
 
     # Getting cost to and from
     collection_cost = np.sum(cost_matrix[np.arange(no_nodes), node_ass]*fromflow)*col_coef
-    print(collection_cost)
     distribution_cost =  np.sum(cost_matrix[np.arange(no_nodes), node_ass]*toflow)*dist_coef
 
     cost_toandfrom_hub = collection_cost+distribution_cost
