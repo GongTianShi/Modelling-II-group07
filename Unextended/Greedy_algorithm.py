@@ -1,6 +1,5 @@
 import numpy as np
 from LoadNetworkData import *
-from numba import njit, prange
 
 
 def node_assignment(hubs, cost_matrix):
@@ -37,7 +36,7 @@ def get_cost(cost_matrix, flow_matrix, hub_cost, hubs, col_coef=3, trans_coef=1,
 
 def greedy_algorithm(cost_matrix, flow_matrix, hub_cost):
     no_nodes = len(hub_cost)
-    hubs = np.random.randint(0, no_nodes, 2)#np.array([2, 8])#np.random.randint(0, no_nodes, 2)#np.array([2, 3, 9])#
+    hubs = np.array([5, 10, 13])#np.random.randint(0, no_nodes, 2)#np.array([2, 8])#np.random.randint(0, no_nodes, 2)#np.array([2, 3, 9])#
     maximal_configuration = False
     cost = get_cost(cost_matrix, flow_matrix, hub_cost, hubs)
     totcost = cost
@@ -67,7 +66,7 @@ def greedy_algorithm(cost_matrix, flow_matrix, hub_cost):
 
 
 
-number, cost, flow_mat, hub_cost, orig_flow, dest_flow = load_data_prefixed(prefix="SMALL", verbose=False)
+number, cost, flow_mat, hub_cost, orig_flow, dest_flow = load_data_prefixed(prefix="LARGE", verbose=False)
 # flow_mat Aij go from i-->j
 '''hubs = np.array([0, 1])
 cost = np.array([[0, 1, 1],
@@ -78,8 +77,6 @@ flow_mat = np.array([[0, 1, 0],
                      [0, 0, 0]])
 hub_cost = np.array([1, 1, 1])
 print(get_cost(cost, flow_mat, hub_cost, hubs))'''
-print(node_assignment(np.array([2, 8]), cost))
-print(get)
 cost, hubs = greedy_algorithm(cost, flow_mat, hub_cost)
 print(hubs)
 print(cost)
