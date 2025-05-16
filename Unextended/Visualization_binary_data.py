@@ -41,7 +41,7 @@ mds = MDS(n_components=2, dissimilarity='precomputed', random_state=42)
 mds_coords = mds.fit_transform(distance)
 
 
-print(f"Starting ")
+print(f"Starting the plotting")
 xi = np.linspace(min(mds_coords[:, 0]), max(mds_coords[:, 0]), 100)
 yi = np.linspace(min(mds_coords[:, 1]), max(mds_coords[:, 1]), 100)
 xi, yi = np.meshgrid(xi, yi)
