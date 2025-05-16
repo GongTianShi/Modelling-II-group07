@@ -33,6 +33,7 @@ for ii in prange(np.shape(combinations)[0]):
         cost_states[ii] = get_cost(cost, flow_mat, hub_cost, combination_to_hubs(combinations[ii, :]))
     for jj in range(ii+1):
         distance[ii, jj] = hamming_distance(combinations[ii, :], combinations[jj, :])
+cost_states[0] = np.mean(cost_states)
 distance = distance + distance.T
 
 print(f"Starting the MDS calculations")
