@@ -39,14 +39,15 @@ distance = distance + distance.T
 print(f"Starting the MDS calculations")
 mds = MDS(n_components=2, dissimilarity='precomputed', random_state=42)
 mds_coords = mds.fit_transform(distance)
+print(mds_coords[0, :])
 
 
 print(f"Starting the plotting")
-xi = np.linspace(min(mds_coords[:, 0]), max(mds_coords[:, 0]), 100)
-yi = np.linspace(min(mds_coords[:, 1]), max(mds_coords[:, 1]), 100)
+xi = np.linspace(min(mds_coords[:, 0]), max(mds_coords[:, 0]), 1000)
+yi = np.linspace(min(mds_coords[:, 1]), max(mds_coords[:, 1]), 1000)
 xi, yi = np.meshgrid(xi, yi)
 
-zi = griddata((mds_coords[:, 0], mds_coords[:, 1]), cost_states, (xi, yi), method='cubic')
+zi = griddata((mds_coords[:, 0], mds_coords[:, 1]), cost_states, (xi, yi), method='linear')
 
 
 fig = plt.figure(figsize=(8, 6))
