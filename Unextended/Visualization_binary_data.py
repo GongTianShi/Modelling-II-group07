@@ -45,14 +45,12 @@ xi = np.linspace(min(mds_coords[:, 0]), max(mds_coords[:, 0]), 100)
 yi = np.linspace(min(mds_coords[:, 1]), max(mds_coords[:, 1]), 100)
 xi, yi = np.meshgrid(xi, yi)
 
-# Interpolate z values on the grid
 zi = griddata((mds_coords[:, 0], mds_coords[:, 1]), cost_states, (xi, yi), method='cubic')
 
 
 fig = plt.figure(figsize=(8, 6))
 ax = fig.add_subplot(111, projection='3d')
 
-# Plot points
 ax.plot_surface(xi, yi, zi, cmap='viridis', edgecolor="none")
 
 ax.set_xlabel("MDS Dimension 1")
