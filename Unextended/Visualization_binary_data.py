@@ -47,7 +47,7 @@ xi = np.linspace(min(mds_coords[:, 0]), max(mds_coords[:, 0]), 1000)
 yi = np.linspace(min(mds_coords[:, 1]), max(mds_coords[:, 1]), 1000)
 xi, yi = np.meshgrid(xi, yi)
 
-zi = griddata((mds_coords[:, 0], mds_coords[:, 1]), cost_states, (xi, yi), method='linear')
+zi = griddata((mds_coords[:, 0], mds_coords[:, 1]), cost_states, (xi, yi), method='nearest')
 
 
 fig = plt.figure(figsize=(8, 6))
@@ -57,7 +57,7 @@ ax.plot_surface(xi, yi, zi, cmap='viridis', edgecolor="none")
 
 ax.set_xlabel("MDS Dimension 1")
 ax.set_ylabel("MDS Dimension 2")
-ax.set_zlabel("Value")
-ax.set_title("3D MDS Plot")
+ax.set_zlabel("Cost")
+ax.set_title("The cost landscape of the small network")
 
 plt.show()
