@@ -7,6 +7,7 @@ def node_assignment(hubs, cost_matrix):
 
 
 def get_cost(cost_matrix, flow_matrix, hub_cost, hubs, col_coef=3, trans_coef=1, dist_coef=2):
+    hubs = np.sort(hubs)
     no_nodes = len(hub_cost)
     toflow = np.sum(flow_matrix, axis=0)
     fromflow = np.sum(flow_matrix, axis = 1)
