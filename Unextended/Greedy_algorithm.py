@@ -35,13 +35,12 @@ def greedy_algorithm(cost_matrix, flow_matrix, hub_cost):
 
 
 
-number, cost_mat, flow_mat, hub_cost, orig_flow, dest_flow = load_data_prefixed(prefix="SMALL", verbose=False)
+number, cost_mat, flow_mat, hub_cost, orig_flow, dest_flow = load_data_prefixed(prefix="LARGE", verbose=False)
 # flow_mat Aij go from i-->j
 cost_f, hubs = greedy_algorithm(cost_mat, flow_mat, hub_cost)
-#print(hubs)
-#print(cost_f)
-#print(node_assignment(hubs, cost))
-print(get_cost(cost_mat, flow_mat, hub_cost, np.array([4, 9, 3])))
+print(hubs+1)
+print(cost_f)
+print(node_assignment(np.sort(hubs), cost_mat)+1)
 
 #print(np.sum(flow_mat, axis = 0))
 #print(dest_flow)
