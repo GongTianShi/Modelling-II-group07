@@ -46,9 +46,26 @@ print(f"Starting the plotting")
 xi = np.linspace(min(mds_coords[:, 0]), max(mds_coords[:, 0]), 1000)
 yi = np.linspace(min(mds_coords[:, 1]), max(mds_coords[:, 1]), 1000)
 xi, yi = np.meshgrid(xi, yi)
-
 zi = griddata((mds_coords[:, 0], mds_coords[:, 1]), cost_states, (xi, yi), method='nearest')
 
+#Making the heatmap
+special_comb = np.array([0,0,0,1,0,0,0,0,0,1])
+special_idx = np.where((combinations == special_comb).all(axis=1))[0][0]
+special_x, special_y = mds_coords[special_idx, 0], mds_coords[special_idx, 1]
+xi_flat = xi[0, :]
+yi_flat = yi[:, 0]
+x_img_idx = np.argmin(np.abs(xi_flat - special_x))
+y_img_idx = np.argmin(np.abs(yi_flat - special_y))
+
+plt.figure(figsize=(10, 8))
+img = plt.imshow(zi, extent=(xi.min(), xi.max(), yi.min(), yi.max()), origin='lower', aspect='auto')
+cbar = plt.colorbar(img)
+cbar.set_label('Cost')
+plt.xlabel('MDS Dimension 1')
+plt.ylabel('MDS Dimension 2')
+plt.scatter(special_x, special_y, color='red', marker='*', s=100, label='{4, 10}')
+plt.legend()
+plt.show()
 
 fig = plt.figure(figsize=(8, 6))
 ax = fig.add_subplot(111, projection='3d')
